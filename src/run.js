@@ -5,12 +5,12 @@ const { AssetInfo } = require('./asset-info')
 const Path = require('node:path')
 const sharp = require('sharp')
 
-console.log(decodeUuid("3axndHaX5BpaAM0sLzpmjZ"))
-console.log(decodeUuid("80UhoqjbJC7IFiWcqUzKMI"))
-console.log(decodeUuid("f2FZiimR5GypDNXLyOW4Gt"))
-console.log(decodeUuid("fdXwj1SeRDbb1UjqJt8EXH"))
-console.log(decodeUuid("25vJaiFT1KJasEbSEwDpWl"))
-return
+// console.log(decodeUuid("3axndHaX5BpaAM0sLzpmjZ"))
+// console.log(decodeUuid("80UhoqjbJC7IFiWcqUzKMI"))
+// console.log(decodeUuid("f2FZiimR5GypDNXLyOW4Gt"))
+// console.log(decodeUuid("fdXwj1SeRDbb1UjqJt8EXH"))
+// console.log(decodeUuid("25vJaiFT1KJasEbSEwDpWl"))
+// return
 
 const settingContent = fs.readFileSync("./src/info.json")
 const {assets} = JSON.parse(settingContent)
@@ -78,13 +78,14 @@ const serachAssetsImportPath = () => {
                 if (_spriteFrames == null) continue
                 for (const [spriteFrameName, {__uuid__}] of Object.entries(_spriteFrames)) {
                     const assetPath = getAssetPathByUuid(__uuid__)
+                    // if (__uuid__.length != 22) continue
                     uuidToSpriteFrameName.set(__uuid__, spriteFrameName)
+                    // console.log(`asset path: ${assetPath}`)
                 }
             } else if (__type__ == "cc.SpriteFrame") {
                 const packedPngUuid = content.texture
                 spriteFrameDecodeUuidToSpriteAltasUuid.set(uuid, packedPngUuid)
                 spriteFrameDecodeUuidToInfo.set(uuid, content)
-                // let a = 3
             }
         }
     }
@@ -92,11 +93,12 @@ const serachAssetsImportPath = () => {
 
 const generateAssetsMap = () => {
     for (const [uuid, [resPath]] of Object.entries(assets)) {
-        if (uuid.length != 22) continue
+        // if (uuid.length != 22) continue
         if (resPath.endsWith(".mp3")) continue
         let path = `${resPath}`
+        // if (path.endsWith(".pac")) console.log(`pac: ${path}`)
         if (!path.startsWith(`${resPreffix}slots`)) continue
-        if (!path.endsWith(".png") && !path.endsWith(".jpg")) continue
+        if (!path.endsWith(".png") && !path.endsWith(".jpg") && !path.endsWith(".pac")) continue
         if (resPath.startsWith(resPreffix)) {
             const decode = decodeUuid(uuid)
             const path = `${resDestPath}/${resPath.substring(resPreffix.length)}`
@@ -105,7 +107,6 @@ const generateAssetsMap = () => {
         }
     
         path = getAssetPathByUuid(uuid)
-
         const info = new AssetInfo(uuid, path)
         assetInfos.set(uuid, info)
     }
@@ -121,14 +122,22 @@ for ([uuid, spriteFrameName] of uuidToSpriteFrameName) {
     let [x, y, w, h] = rect
     if (rotated == 1) [w, h] = [h, w]
     const altasPngPath = uuidToPath.get(altasUuid)
-
     if (altasPngPath == null) continue
-    if (!altasPngPath.endsWith(".png")) continue
+    // console.log(`${spriteFrameName}: ${altasPngPath}`)
+    if (altasPngPath.endsWith(".jpg")) {
+        console.log(`jpg: ${altasPngPath}`)
+    } else {
+        // continue
+    }
+    // if (!altasPngPath.endsWith(".png")) continue
 
     const altasDirPath = Path.dirname(altasPngPath)
-    const baseName = Path.basename(altasPngPath, ".png")
+    let baseName = Path.basename(altasPngPath, ".png")
+    baseName = Path.basename(baseName, ".jpg")
 
-    if (!fs.existsSync(altasDirPath)) continue
+    if (!fs.existsSync(altasDirPath)) {
+        continue
+    }
 
     const destPath = Path.join(altasDirPath, baseName)
     const destPngPath = Path.join(destPath, `${spriteFrameName}.png`)
@@ -150,4 +159,4 @@ for ([uuid, spriteFrameName] of uuidToSpriteFrameName) {
     console.log(uuid, path, spriteFrameName)
 }
 
-console.log(1)
+// console.log(1)
