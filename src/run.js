@@ -5,6 +5,13 @@ const { AssetInfo } = require('./asset-info')
 const Path = require('node:path')
 const sharp = require('sharp')
 
+console.log(decodeUuid("3axndHaX5BpaAM0sLzpmjZ"))
+console.log(decodeUuid("80UhoqjbJC7IFiWcqUzKMI"))
+console.log(decodeUuid("f2FZiimR5GypDNXLyOW4Gt"))
+console.log(decodeUuid("fdXwj1SeRDbb1UjqJt8EXH"))
+console.log(decodeUuid("25vJaiFT1KJasEbSEwDpWl"))
+return
+
 const settingContent = fs.readFileSync("./src/info.json")
 const {assets} = JSON.parse(settingContent)
 
