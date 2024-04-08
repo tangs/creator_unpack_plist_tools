@@ -62,7 +62,7 @@ for (const [encodeUuid, [assetPath]] of Object.entries(assets)) {
     // console.log(pngPath)
     if (pathToUuid.has(pngPath)) {
         // console.log(uuid, pngPath)
-        // fntInfos.push([uuid, pngPath])
+        fntInfos.push([uuid, pngPath])
         continue
     }
     
@@ -98,12 +98,14 @@ for (const [uuid, pngPath] of fntInfos) {
     const basename = path.basename(pngPath, ".png")
     const parentDir = path.join(resDestPath, dir);
     const destDir = path.join(parentDir, basename)
+    const destCodeDir = path.join(parentDir, `${basename}_code`)
     const resPngPath = path.join(resDestPath, pngPath)
 
     if (!fs.existsSync(parentDir)) continue
     if (!fs.existsSync(resPngPath)) continue
 
     if (!fs.existsSync(destDir)) fs.mkdirSync(destDir)
+    if (!fs.existsSync(destCodeDir)) fs.mkdirSync(destCodeDir)
 
     const jsonPath = `${getAssetPathByUuid(uuid)}.json`
     if (!fs.existsSync(jsonPath)) continue
@@ -115,6 +117,7 @@ for (const [uuid, pngPath] of fntInfos) {
         if (w == 0 && h == 0) continue
         // console.log(ch, code, x, y, w, h)
         const chPath = path.join(destDir, `${ch}.png`)
+        const codePath = path.join(destCodeDir, `${code}.png`)
         console.log(chPath)
 
         sharp(resPngPath).extract({
@@ -125,6 +128,16 @@ for (const [uuid, pngPath] of fntInfos) {
             console.log(`Image cropped and saved: ${resPngPath}, ${ch}`)
         }).catch(() => {
             console.error(`An error occured: ${resPngPath}, ${ch}`);
+        })
+
+        sharp(resPngPath).extract({
+            left: x, top: y,
+            width: w, height: h,
+        }).toFile(codePath)
+        .then((_info) => {
+            console.log(`Image cropped and saved: ${resPngPath}, ${code}`)
+        }).catch(() => {
+            console.error(`An error occured: ${resPngPath}, ${code}`);
         })
     }
 
