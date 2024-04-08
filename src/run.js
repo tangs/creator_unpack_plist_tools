@@ -10,10 +10,16 @@ const sharp = require('sharp')
 // console.log(decodeUuid("f2FZiimR5GypDNXLyOW4Gt"))
 // console.log(decodeUuid("fdXwj1SeRDbb1UjqJt8EXH"))
 // console.log(decodeUuid("25vJaiFT1KJasEbSEwDpWl"))
+// console.log(decodeUuid("e3lyJ4+x5Iv5bItfWRgP4N"))
+// console.log(decodeUuid("0eRlg2ujBHh6YdMUX1GZzV"))
+// console.log(decodeUuid("38CwynOn1P6a5f50uRDjb5"))
+// console.log(decodeUuid("00qhrAuFFMW434Cs/Uh0NI"))
+// console.log(decodeUuid("5f+pz4pItON45nYYSgkMmF"))
+// console.log(decodeUuid("6d/a7gl1dJAr+IGw7UiSEp"))
 // return
 
 const settingContent = fs.readFileSync("./src/info.json")
-const {assets} = JSON.parse(settingContent)
+const { assets } = JSON.parse(settingContent)
 
 const resOriginPath = "/Users/tangs/Desktop/vegass/unzip/resources_origin"
 const resDestPath = "/Users/tangs/Desktop/vegass/unzip/resources"
