@@ -1,8 +1,9 @@
-const { decodeUuid } = require("./handlerPlist")
-const fs = require("fs")
+const { decodeUuid } = require('./handlerPlist')
+const fs = require('fs')
 const { AssetInfo } = require('./asset-info')
 const Path = require('node:path')
 const sharp = require('sharp')
+const { resOriginPath, resDestPath, assetsImportPath, infoJsonPath } = require('./config')
 
 // console.log(decodeUuid("3axndHaX5BpaAM0sLzpmjZ"))
 // console.log(decodeUuid("80UhoqjbJC7IFiWcqUzKMI"))
@@ -21,12 +22,9 @@ const sharp = require('sharp')
 // console.log(decodeUuid("f7y/n6j7JBtLFrxWI9xwvF"))
 // return
 
-const settingContent = fs.readFileSync("./src/info.json")
+const settingContent = fs.readFileSync(infoJsonPath)
 const { assets } = JSON.parse(settingContent)
 
-const resOriginPath = "/Users/tangs/Desktop/vegass/unzip/resources_origin"
-const resDestPath = "/Users/tangs/Desktop/vegass/unzip/resources"
-const assetsImportPath = "/Users/tangs/Desktop/vegass/apk/assets/res/import"
 
 const resPreffix = "resources/"
 
@@ -194,14 +192,13 @@ const run = async () => {
             console.log(destOriginPngPath, decodeUuid(uuid))
             console.log(t, b, l, r)
             console.log(ow, oh, w, h, ox, oy, wd, hd)
-            await sharp(destPngPath).extend(
-                {
-                    top: t,
-                    bottom: b,
-                    left: l,
-                    right: r,
-                    background: { r: 0, g: 0, b: 0, alpha: 0 },
-                }).toFile(destOriginPngPath)
+            await sharp(destPngPath).extend({
+                top: t,
+                bottom: b,
+                left: l,
+                right: r,
+                background: { r: 0, g: 0, b: 0, alpha: 0 },
+            }).toFile(destOriginPngPath)
             // console.log(ret2)
         }
     }
