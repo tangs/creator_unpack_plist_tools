@@ -145,31 +145,12 @@ const run = async () => {
                 background: { r: 0, g: 0, b: 0, alpha: 0 },
             })
             .toFile(chPath)
-            // .then((_info) => {
-            //     console.log(`Image cropped and saved: ${resPngPath}, ${ch}`)
-            // }).catch(() => {
-            //     console.error(`An error occured: ${resPngPath}, ${ch}`);
-            // })
-    
-            await sharp(resPngPath)
-            .extract({
-                left: x, 
-                top: y,
-                width: w - extendX, 
-                height: h - extendY,
-            })
-            .extend({
-                top: 0,
-                bottom: extendY,
-                left: 0,
-                right: extendX,
-                background: { r: 0, g: 0, b: 0, alpha: 0 },
-            }).toFile(codePath)
-            // .then((_info) => {
-            //     console.log(`Image cropped and saved: ${resPngPath}, ${code}`)
-            // }).catch(() => {
-            //     console.error(`An error occured: ${resPngPath}, ${code}`);
-            // })
+            
+            fs.cpSync(chPath, codePath, { force: true })
+            // await sharp(resPngPath)
+            // .extract(extractInfo)
+            // .extend(extendInfo)
+            // .toFile(codePath)
         }
     
         // console.log(destDir, jsonPath)
