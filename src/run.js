@@ -33,8 +33,12 @@ const resPreffix = "resources/"
 //         console.error('Error running script:', error)
 //       }
 // })
-fs.rmSync(resDestPath, { recursive: true, force: true })
+console.log("start copy files.")
+if (fs.existsSync(resDestPath)) {
+    fs.rmSync(resDestPath, { recursive: true, force: true })
+}
 fs.cpSync(resOriginPath, resDestPath, { recursive: true, force: true })
+console.log("end copy files.")
 
 const assetInfos = new Map()
 const uuidToSpriteFrameName = new Map()
@@ -186,7 +190,7 @@ const run = async () => {
             const destOriginPngPath = Path.join(destOriginPath, `${spriteFrameName}.png`)
     
             const [wd, hd] = [ow - w, oh - h]
-            const [t, l] = [Math.floor(hd / 2 - oy), Math.floor(wd / 2 - ox)]
+            const [t, l] = [Math.floor(hd / 2 - oy), Math.floor(wd / 2 + ox)]
             // const [t, l] = [Math.floor(hd * (1 - oy)), Math.floor(wd * ox)]
             const [b, r] = [hd - t, wd - l]
             console.log(destOriginPngPath, decodeUuid(uuid))

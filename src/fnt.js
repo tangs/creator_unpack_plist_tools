@@ -1,7 +1,6 @@
 const fs = require("fs")
 const { decodeUuid } = require("./handlerPlist")
 const path = require('node:path')
-const { exec } = require('child_process');
 const sharp = require('sharp');
 
 const settingContent = fs.readFileSync("./src/info.json")
@@ -74,13 +73,13 @@ const run = async () => {
         console.assert(files.length < 3, dirAbsPath, pngname, files.length)
         if (files.length >= 3) continue
     
-        if (files.length == 2) {
-            const [maxFile, minFile] = files[0].length > files[1].length ? [files[0], files[1]] : [files[1], files[0]]
-            const idx = maxFile.indexOf("_origin")
-            if (idx != -1 && maxFile.replace("_origin", "") == minFile) {
-                files = [minFile]
-            }
-        }
+        // if (files.length == 2) {
+        //     const [maxFile, minFile] = files[0].length > files[1].length ? [files[0], files[1]] : [files[1], files[0]]
+        //     const idx = maxFile.indexOf("_origin")
+        //     if (idx != -1 && maxFile.replace("_origin", "") == minFile) {
+        //         files = [minFile]
+        //     }
+        // }
     
         for (const file of files) {
             const destPngPath = file.substring(resDestPath.length)
@@ -124,11 +123,11 @@ const run = async () => {
             const chPath = path.join(destDir, `${ch}.png`)
             const codePath = path.join(destCodeDir, `${code}.png`)
             console.log(chPath)
-            // console.log(resPngPath)
-            // console.log(x, y, w, h)
-            // console.log(rx, ry, originWidth, originHeight)
-            // console.log(extendX, extendY)
-            // console.log(x, y, w - extendX, h - extendY)
+            console.log(resPngPath)
+            console.log(x, y, w, h)
+            console.log(rx, ry, originWidth, originHeight)
+            console.log(extendX, extendY)
+            console.log(x, y, w - extendX, h - extendY)
 
             await sharp(resPngPath)
             .extract({
