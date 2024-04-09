@@ -1,6 +1,5 @@
 const { decodeUuid } = require("./handlerPlist")
 const fs = require("fs")
-const { exec } = require('child_process');
 const { AssetInfo } = require('./asset-info')
 const Path = require('node:path')
 const sharp = require('sharp')
@@ -16,6 +15,10 @@ const sharp = require('sharp')
 // console.log(decodeUuid("00qhrAuFFMW434Cs/Uh0NI"))
 // console.log(decodeUuid("5f+pz4pItON45nYYSgkMmF"))
 // console.log(decodeUuid("6d/a7gl1dJAr+IGw7UiSEp"))
+// console.log(decodeUuid("a76aA6DB9MVaytoFM74HF1"))
+// console.log(decodeUuid("1cSF9kEixCIaNwDBz112Z+"))
+// console.log(decodeUuid("371Iu/6mtES6STzohEQlvX"))
+// console.log(decodeUuid("f7y/n6j7JBtLFrxWI9xwvF"))
 // return
 
 const settingContent = fs.readFileSync("./src/info.json")
@@ -27,11 +30,13 @@ const assetsImportPath = "/Users/tangs/Desktop/vegass/apk/assets/res/import"
 
 const resPreffix = "resources/"
 
-exec(`rm -rf ${resDestPath}; cp -rf ${resOriginPath} ${resDestPath}`, (error, stdout, stderr) => {
-    if (error) {
-        console.error('Error running script:', error)
-      }
-})
+// exec(`rm -rf ${resDestPath}; cp -rf ${resOriginPath} ${resDestPath}`, (error, stdout, stderr) => {
+//     if (error) {
+//         console.error('Error running script:', error)
+//       }
+// })
+fs.rmSync(resDestPath, { recursive: true, force: true })
+fs.cpSync(resOriginPath, resDestPath, { recursive: true, force: true })
 
 const assetInfos = new Map()
 const uuidToSpriteFrameName = new Map()
@@ -121,48 +126,90 @@ const generateAssetsMap = () => {
 generateAssetsMap()
 serachAssetsImportPath()
 
-for ([uuid, spriteFrameName] of uuidToSpriteFrameName) {
-    const { altasUuid, path, info, spriteFrameName, ret } = getAltasPathAndInfo(uuid)
-    if (!ret) continue
-    const { rect, offset, originalSize, rotated } = info
-    let [x, y, w, h] = rect
-    if (rotated == 1) [w, h] = [h, w]
-    const altasPngPath = uuidToPath.get(altasUuid)
-    if (altasPngPath == null) continue
-    // console.log(`${spriteFrameName}: ${altasPngPath}`)
-    if (altasPngPath.endsWith(".jpg")) {
-        console.log(`jpg: ${altasPngPath}`)
-    } else {
-        // continue
+const run = async () => {
+
+    for ([uuid, spriteFrameName] of uuidToSpriteFrameName) {
+        const { altasUuid, path, info, spriteFrameName, ret } = getAltasPathAndInfo(uuid)
+        if (!ret) continue
+        let { rect: [x, y, w, h], offset: [ox, oy], originalSize: [ow, oh], rotated } = info
+        // let [x, y, w, h] = rect
+        if (rotated == 1) {
+            [w, h, ow, oh, ox, oy] = [h, w, oh, ow, oy, ox]
+        }
+        // if (rotated == 1) {
+        //     [ow, oh] = [oh, ow]
+        // }
+        // if (rotated == 1) {
+        //     [ox, oy] = [oy, ox]
+        // }
+        const altasPngPath = uuidToPath.get(altasUuid)
+        if (altasPngPath == null) continue
+        // console.log(`${spriteFrameName}: ${altasPngPath}`)
+        if (altasPngPath.endsWith(".jpg")) {
+            // console.log(`jpg: ${altasPngPath}`)
+        } else {
+            // continue
+        }
+        // if (!altasPngPath.endsWith(".png")) continue
+    
+        const altasDirPath = Path.dirname(altasPngPath)
+        let baseName = Path.basename(altasPngPath, ".png")
+        baseName = Path.basename(baseName, ".jpg")
+    
+        if (!fs.existsSync(altasDirPath)) continue
+    
+        const destPath = Path.join(altasDirPath, baseName)
+        const destPngPath = Path.join(destPath, `${spriteFrameName}.png`)
+    
+        if (!fs.existsSync(destPath)) {
+            fs.mkdirSync(destPath)
+        }
+    
+        await sharp(altasPngPath).extract({
+            left: x, top: y,
+            width: w, height: h,
+        }).rotate(rotated == 1 ? -90 : 0).toFile(destPngPath)
+        // console.log(ret1)
+    
+        // .then((_info) => {
+        //     console.log(`Image cropped and saved: ${destPngPath}`)
+        // }).catch(() => {
+        //     console.error(`An error occured: ${destPngPath}`);
+        // })
+    
+        console.log(uuid, path, spriteFrameName)
+    
+        if (w != ow || h != oh) {
+            // if (ox < 0 || ox > 1 || oy < 0 || oy > 1) continue;
+            const destOriginPath = `${destPath}_origin`
+            if (!fs.existsSync(destOriginPath)) {
+                fs.mkdirSync(destOriginPath)
+            }
+            const destOriginPngPath = Path.join(destOriginPath, `${spriteFrameName}.png`)
+    
+            const [wd, hd] = [ow - w, oh - h]
+            const [t, l] = [Math.floor(hd / 2 - oy), Math.floor(wd / 2 - ox)]
+            // const [t, l] = [Math.floor(hd * (1 - oy)), Math.floor(wd * ox)]
+            const [b, r] = [hd - t, wd - l]
+            console.log(destOriginPngPath, decodeUuid(uuid))
+            console.log(t, b, l, r)
+            console.log(ow, oh, w, h, ox, oy, wd, hd)
+            await sharp(destPngPath).extend(
+                {
+                    top: t,
+                    bottom: b,
+                    left: l,
+                    right: r,
+                    background: { r: 0, g: 0, b: 0, alpha: 0 },
+                }).toFile(destOriginPngPath)
+            // console.log(ret2)
+        }
     }
-    // if (!altasPngPath.endsWith(".png")) continue
-
-    const altasDirPath = Path.dirname(altasPngPath)
-    let baseName = Path.basename(altasPngPath, ".png")
-    baseName = Path.basename(baseName, ".jpg")
-
-    if (!fs.existsSync(altasDirPath)) {
-        continue
-    }
-
-    const destPath = Path.join(altasDirPath, baseName)
-    const destPngPath = Path.join(destPath, `${spriteFrameName}.png`)
-
-    if (!fs.existsSync(destPath)) {
-        fs.mkdirSync(destPath)
-    }
-
-    sharp(altasPngPath).extract({
-        left: x, top: y,
-        width: w, height: h,
-    }).rotate(rotated == 1 ? -90 : 0).toFile(destPngPath)
-    .then((_info) => {
-        console.log(`Image cropped and saved: ${destPngPath}`)
-    }).catch(() => {
-        console.error(`An error occured: ${destPngPath}`);
-    })
-
-    console.log(uuid, path, spriteFrameName)
 }
 
+const main = () => {
+    run()
+}
+
+main()
 // console.log(1)

@@ -67,12 +67,23 @@ for (const [encodeUuid, [assetPath]] of Object.entries(assets)) {
     }
     
     // console.log(dirAbsPath, pngname)
-    const files = fileListRec(dirAbsPath).filter((file) => file.endsWith(pngname))
-    console.assert(files.length == 1, dirAbsPath, pngname, files.length)
-    if (files.length != 1) continue
+    let files = fileListRec(dirAbsPath).filter((file) => file.endsWith(pngname))
+    console.assert(files.length < 3, dirAbsPath, pngname, files.length)
+    if (files.length >= 3) continue
 
-    const destPngPath = files[0].substring(resDestPath.length)
-    fntInfos.push([uuid, destPngPath])
+    if (files.length == 2) {
+        const [maxFile, minFile] = files[0].length > files[1].length ? [files[0], files[1]] : [files[1], files[0]]
+        const idx = maxFile.indexOf("_origin")
+        if (idx != -1 && maxFile.replace("_origin", "") == minFile) {
+            files = [minFile]
+        }
+    }
+
+
+    for (const file of files) {
+        const destPngPath = file.substring(resDestPath.length)
+        fntInfos.push([uuid, destPngPath])
+    }
 }
 
 /**
